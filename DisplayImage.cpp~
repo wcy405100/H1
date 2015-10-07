@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+//#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/imgproc/imgproc.hpp>
+
+using namespace cv;
+using namespace std;
+
+Mat rotateImage(const Mat& source, double angle)
+{
+    Mat dst;    
+    Point2f src_center(source.cols/2.0F, source.rows/2.0F); //find the center of the image
+    Mat rot_mat = getRotationMatrix2D(src_center, angle, 1.0); // calculate the transformation matrix for rotating a certain angle on center point
+    
+    warpAffine(source, dst, rot_mat, source.size(),INTER_CUBIC);//make the rotation and store the image into dst
+    return dst;
+}
+
+int main(int argc, char** argv )
+{
+    
+    Mat image, image1, image2, image3, image4;
+    image = imread( "image.jpg", 1 ); // Read file into mat image
+
+    if ( !image.data )
+    {
+        printf("No image data \n");
+        return -1;
+    }
+    
+    imshow("Display Original Image", image);
+
+    waitKey(0);
+
+    cout << "resizing the image.."<<endl;
+    resize(image, image1,image1.size(),1/1.4,2.4,INTER_CUBIC);
+    
+    imshow("resized image",image1);
+    waitKey(0);
+
+    cout << "rotating image.." << endl;
+    image2 = rotateImage(image1, -33.5); // negative angle means clockwise
+    imshow("rotated image",image2);
+    waitKey(0);
+
+    imwrite("image_modified.jpg",image2);
+
+    // inverse transformation of the image
+    image3 = rotateImage(image2, 33.5);
+    resize(image3, image4, image4.size(),1.4,1/2.4,INTER_CUBIC);
+    imshow("inversed image",image4);
+    waitKey(0);
+
+    imwrite("inversed_image.jpg",image4);
+
+    return 0;
+}
